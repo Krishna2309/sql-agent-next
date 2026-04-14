@@ -10,11 +10,72 @@ export default function Chat() {
     <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
       {messages.map((message) => (
         <div key={message.id} className="whitespace-pre-wrap">
-          {message.role === "user" ? "User: " : "AI: "}
+          {/* {message.role === "user" ? "User: " : "AI: "} */}
+          {message.role === "user" ? (
+            <span className="text-3xl">User: </span>
+          ) : (
+            <span className="text-3xl">AI: </span>
+          )}
           {message.parts.map((part, i) => {
             switch (part.type) {
               case "text":
-                return <div key={`${message.id}-${i}`}>{part.text}</div>;
+                return (
+                  <div key={`${message.id}-${i}`} className="mb-2">
+                    {part.text}
+                  </div>
+                );
+              case "tool-schema":
+                return (
+                  <div
+                    key={`${message.id}-${i}`}
+                    className="my-2 p-3 bg-purple-50 dark:bg-purple-900 rounded border border-purple-200 dark:border-purple-800"
+                  >
+                    {/* {JSON.stringify(part, null, 2)} */}
+                    <div className="font-semibold text-purple-700 dark:text-purple-300">
+                      Schema Tool
+                    </div>
+                    {part.state === "output-available" && (
+                      <div className="text-sm text-green-700 dark:text-green-300 py-2">
+                        Schema Loaded
+                      </div>
+                    )}
+                  </div>
+                );
+              case "tool-db":
+                return (
+                  <div
+                    key={`${message.id}-${i}`}
+                    className="my-2 p-3 bg-blue-50 dark:bg-blue-900 rounded border border-blue-200 dark:border-blue-800"
+                  >
+                    {/* {JSON.stringify(part, null, 2)} */}
+                    <div className="font-semibold text-blue-700 dark:text-blue-300 mb-1">
+                      Database Query
+                    </div>
+                    {part.input?.query && (
+                      <pre className="text-xs bg-white dark:bg-zinc-900 p-2 rounded mb-2 overflow-x-auto">
+                        {part.input.query}
+                      </pre>
+                    )}
+                    {part.state === "output-available" && part.output && (
+                      <div className="text-sm text-green-700 dark:text-green-300">
+                        Returned {part.output.rows?.length || 0} rows.
+                      </div>
+                    )}
+                  </div>
+                );
+              case "step-start":
+                return (
+                  <div
+                    key={`${message.id}-${i}`}
+                    className="text-sm text-gray-500 dark:text-gray-400 my-4"
+                  >
+                    Processing....
+                  </div>
+                );
+              case "reasoning":
+                return null; // Don't render reasoning parts in the UI
+              default:
+                return null;
             }
           })}
         </div>
